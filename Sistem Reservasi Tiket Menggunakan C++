@@ -2,141 +2,158 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <limits>
 
 using namespace std;
 
-struct Jadwal {
-    string tujuan;
-    string jam;
-    int harga;
-    int kursi_tersedia;
+
+struct Seat {
+    int number;
+    bool isBooked;
 };
 
-struct Reservasi {
-    string nama;
-    string tujuan;
-    string jam;
-    int jumlah_tiket;
-    int total_harga;
+
+struct Bus {
+    string type;
+    double price;
+    vector<Seat> seats;
 };
 
-void tampilkanJadwal(const vector<Jadwal>& jadwal) {
-    cout << left << setw(5) << "No"
-         << setw(20) << "Tujuan"
-         << setw(15) << "Jam"
-         << setw(10) << "Harga"
-         << "Kursi Tersedia" << endl;
-    cout << string(60, '-') << endl;
-    for (size_t i = 0; i < jadwal.size(); ++i) {
-        cout << setw(5) << i + 1
-             << setw(20) << jadwal[i].tujuan
-             << setw(15) << jadwal[i].jam
-             << setw(10) << jadwal[i].harga
-             << jadwal[i].kursi_tersedia << endl;
+
+int getValidatedInput(int min, int max) {
+    int input;
+    while (true) {
+        cin >> input;
+        if (cin.fail() || input < min || input > max) {
+            cout << "Input tidak valid, masukkan angka antara " << min << " dan " << max << ": ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        } else {
+            break;
+        }
+    }
+    return input;
+}
+
+// Fungsi login
+bool login() {
+    string username, password;
+    const string correctUsername = "admin";
+    const string correctPassword = "123";
+
+    for (int attempts = 3; attempts > 0; --attempts) {
+        cout << "\nMasukkan username: ";
+        cin >> username;
+        cout << "Masukkan password: ";
+        cin >> password;
+
+        if (username == correctUsername && password == correctPassword) {
+            cout << "Login berhasil!\n";
+            return true;
+        } else {
+            cout << "Username atau password salah. Percobaan tersisa: " << attempts - 1 << "\n";
+        }
+    }
+
+    cout << "Anda telah gagal login sebanyak 3 kali. Program keluar.\n";
+    return false;
+}
+
+
+void printDestinations() {
+    cout << "\nPilih jurusan perjalanan:\n";
+    cout << "1. Jogja - Magelang\n";
+    cout << "2. Jogja - Solo\n";
+    cout << "3. Jogja - Semarang\n";
+    cout << "4. Jogja - Surabaya\n";
+    cout << "5. Jogja - Cirebon\n";
+}
+
+
+void printBusOptions(vector<Bus> &buses) {
+    cout << "\nPilih jenis bus:\n";
+    for (size_t i = 0; i < buses.size(); ++i) {
+        cout << i + 1 << ". " << buses[i].type << " (Rp " << fixed << setprecision(0) << buses[i].price << ")\n";
     }
 }
 
-void buatReservasi(vector<Jadwal>& jadwal, vector<Reservasi>& reservasi) {
-    string nama;
-    int pilihan, jumlah_tiket;
 
-    cout << "\nMasukkan nama Anda: ";
-    cin.ignore();
-    getline(cin, nama);
-
-    tampilkanJadwal(jadwal);
-
-    cout << "\nPilih nomor tujuan: ";
-    cin >> pilihan;
-
-    if (pilihan < 1 || pilihan > jadwal.size()) {
-        cout << "Pilihan tidak valid!" << endl;
-        return;
-    }
-
-    Jadwal& jadwal_terpilih = jadwal[pilihan - 1];
-
-    cout << "Masukkan jumlah tiket: ";
-    cin >> jumlah_tiket;
-
-    if (jumlah_tiket > jadwal_terpilih.kursi_tersedia) {
-        cout << "Kursi tidak mencukupi!" << endl;
-        return;
-    }
-
-    Reservasi baru{
-        nama,
-        jadwal_terpilih.tujuan,
-        jadwal_terpilih.jam,
-        jumlah_tiket,
-        jumlah_tiket * jadwal_terpilih.harga
+void bookingSystem() {
+    
+    vector<Bus> buses = {
+        {"Ekonomi", 50000, vector<Seat>(20)},
+        {"Patas", 80000, vector<Seat>(20)},
+        {"Eksekutif", 120000, vector<Seat>(20)}
     };
 
-    jadwal_terpilih.kursi_tersedia -= jumlah_tiket;
-    reservasi.push_back(baru);
-
-    cout << "\nReservasi berhasil! Berikut detailnya:" << endl;
-    cout << "Nama         : " << baru.nama << endl;
-    cout << "Tujuan       : " << baru.tujuan << endl;
-    cout << "Jam          : " << baru.jam << endl;
-    cout << "Jumlah Tiket : " << baru.jumlah_tiket << endl;
-    cout << "Total Harga  : Rp" << baru.total_harga << endl;
-}
-
-void tampilkanReservasi(const vector<Reservasi>& reservasi) {
-    if (reservasi.empty()) {
-        cout << "\nBelum ada reservasi." << endl;
-        return;
+    
+    for (auto &bus : buses) {
+        for (size_t i = 0; i < bus.seats.size(); ++i) {
+            bus.seats[i] = {static_cast<int>(i + 1), false};
+        }
     }
 
-    cout << "\nDaftar Reservasi:" << endl;
-    for (size_t i = 0; i < reservasi.size(); ++i) {
-        cout << "\nReservasi " << i + 1 << endl;
-        cout << "Nama         : " << reservasi[i].nama << endl;
-        cout << "Tujuan       : " << reservasi[i].tujuan << endl;
-        cout << "Jam          : " << reservasi[i].jam << endl;
-        cout << "Jumlah Tiket : " << reservasi[i].jumlah_tiket << endl;
-        cout << "Total Harga  : Rp" << reservasi[i].total_harga << endl;
+    string customerName;
+    cout << "\nMasukkan nama Anda: ";
+    cin.ignore();
+    getline(cin, customerName);
+
+    printDestinations();
+    cout << "Masukkan pilihan jurusan (1-5): ";
+    int destinationChoice = getValidatedInput(1, 5);
+
+    printBusOptions(buses);
+    cout << "Masukkan pilihan jenis bus (1-3): ";
+    int busChoice = getValidatedInput(1, 3);
+
+    Bus &selectedBus = buses[busChoice - 1];
+
+    cout << "\nBerapa tiket yang ingin Anda pesan? (1-5): ";
+    int ticketCount = getValidatedInput(1, 5);
+
+    vector<int> bookedSeats;
+    for (int i = 0; i < ticketCount; ++i) {
+        cout << "\nKursi tersedia: ";
+        for (const auto &seat : selectedBus.seats) {
+            if (!seat.isBooked) {
+                cout << seat.number << " ";
+            }
+        }
+
+        cout << "\nPilih nomor kursi: ";
+        int seatNumber = getValidatedInput(1, selectedBus.seats.size());
+
+        if (!selectedBus.seats[seatNumber - 1].isBooked) {
+            selectedBus.seats[seatNumber - 1].isBooked = true;
+            bookedSeats.push_back(seatNumber);
+        } else {
+            cout << "Kursi " << seatNumber << " sudah dipesan. Pilih kursi lain.\n";
+            --i;
+        }
     }
+
+    double totalPrice = selectedBus.price * ticketCount + 5000; 
+
+   
+    cout << "\n====================================================\n";
+    cout << "Tiket Anda:\n";
+    cout << "Nama: " << customerName << "\n";
+    cout << "Jurusan: " << destinationChoice << "\n";
+    cout << "Jenis Bus: " << selectedBus.type << "\n";
+    cout << "Kursi: ";
+    for (const auto &seat : bookedSeats) {
+        cout << seat << " ";
+    }
+    cout << "\nJumlah Tiket: " << ticketCount << "\n";
+    cout << "Total Harga: Rp " << fixed << setprecision(0) << totalPrice << "\n";
+    cout << "====================================================\n";
 }
 
 int main() {
-    vector<Jadwal> jadwal{
-        {"Jakarta", "08:00", 150000, 20},
-        {"Bandung", "10:00", 100000, 15},
-        {"Yogyakarta", "14:00", 200000, 10},
-        {"Surabaya", "18:00", 250000, 8}
-    };
-
-    vector<Reservasi> reservasi;
-    int pilihan;
-
-    do {
-        cout << "\nMenu Sistem Reservasi Tiket:\n";
-        cout << "1. Tampilkan Jadwal\n";
-        cout << "2. Buat Reservasi\n";
-        cout << "3. Tampilkan Reservasi\n";
-        cout << "4. Keluar\n";
-        cout << "Pilih menu: ";
-        cin >> pilihan;
-
-        switch (pilihan) {
-            case 1:
-                tampilkanJadwal(jadwal);
-                break;
-            case 2:
-                buatReservasi(jadwal, reservasi);
-                break;
-            case 3:
-                tampilkanReservasi(reservasi);
-                break;
-            case 4:
-                cout << "Keluar dari program." << endl;
-                break;
-            default:
-                cout << "Pilihan tidak valid!" << endl;
-        }
-    } while (pilihan != 4);
-
+    cout << "Selamat datang di Sistem Pemesanan Tiket Bus\n";
+    if (!login()) {
+        return 0;
+    }
+    bookingSystem();
     return 0;
 }
