@@ -1,0 +1,142 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <iomanip>
+
+using namespace std;
+
+struct Jadwal {
+    string tujuan;
+    string jam;
+    int harga;
+    int kursi_tersedia;
+};
+
+struct Reservasi {
+    string nama;
+    string tujuan;
+    string jam;
+    int jumlah_tiket;
+    int total_harga;
+};
+
+void tampilkanJadwal(const vector<Jadwal>& jadwal) {
+    cout << left << setw(5) << "No"
+         << setw(20) << "Tujuan"
+         << setw(15) << "Jam"
+         << setw(10) << "Harga"
+         << "Kursi Tersedia" << endl;
+    cout << string(60, '-') << endl;
+    for (size_t i = 0; i < jadwal.size(); ++i) {
+        cout << setw(5) << i + 1
+             << setw(20) << jadwal[i].tujuan
+             << setw(15) << jadwal[i].jam
+             << setw(10) << jadwal[i].harga
+             << jadwal[i].kursi_tersedia << endl;
+    }
+}
+
+void buatReservasi(vector<Jadwal>& jadwal, vector<Reservasi>& reservasi) {
+    string nama;
+    int pilihan, jumlah_tiket;
+
+    cout << "\nMasukkan nama Anda: ";
+    cin.ignore();
+    getline(cin, nama);
+
+    tampilkanJadwal(jadwal);
+
+    cout << "\nPilih nomor tujuan: ";
+    cin >> pilihan;
+
+    if (pilihan < 1 || pilihan > jadwal.size()) {
+        cout << "Pilihan tidak valid!" << endl;
+        return;
+    }
+
+    Jadwal& jadwal_terpilih = jadwal[pilihan - 1];
+
+    cout << "Masukkan jumlah tiket: ";
+    cin >> jumlah_tiket;
+
+    if (jumlah_tiket > jadwal_terpilih.kursi_tersedia) {
+        cout << "Kursi tidak mencukupi!" << endl;
+        return;
+    }
+
+    Reservasi baru{
+        nama,
+        jadwal_terpilih.tujuan,
+        jadwal_terpilih.jam,
+        jumlah_tiket,
+        jumlah_tiket * jadwal_terpilih.harga
+    };
+
+    jadwal_terpilih.kursi_tersedia -= jumlah_tiket;
+    reservasi.push_back(baru);
+
+    cout << "\nReservasi berhasil! Berikut detailnya:" << endl;
+    cout << "Nama         : " << baru.nama << endl;
+    cout << "Tujuan       : " << baru.tujuan << endl;
+    cout << "Jam          : " << baru.jam << endl;
+    cout << "Jumlah Tiket : " << baru.jumlah_tiket << endl;
+    cout << "Total Harga  : Rp" << baru.total_harga << endl;
+}
+
+void tampilkanReservasi(const vector<Reservasi>& reservasi) {
+    if (reservasi.empty()) {
+        cout << "\nBelum ada reservasi." << endl;
+        return;
+    }
+
+    cout << "\nDaftar Reservasi:" << endl;
+    for (size_t i = 0; i < reservasi.size(); ++i) {
+        cout << "\nReservasi " << i + 1 << endl;
+        cout << "Nama         : " << reservasi[i].nama << endl;
+        cout << "Tujuan       : " << reservasi[i].tujuan << endl;
+        cout << "Jam          : " << reservasi[i].jam << endl;
+        cout << "Jumlah Tiket : " << reservasi[i].jumlah_tiket << endl;
+        cout << "Total Harga  : Rp" << reservasi[i].total_harga << endl;
+    }
+}
+
+int main() {
+    vector<Jadwal> jadwal{
+        {"Jakarta", "08:00", 150000, 20},
+        {"Bandung", "10:00", 100000, 15},
+        {"Yogyakarta", "14:00", 200000, 10},
+        {"Surabaya", "18:00", 250000, 8}
+    };
+
+    vector<Reservasi> reservasi;
+    int pilihan;
+
+    do {
+        cout << "\nMenu Sistem Reservasi Tiket:\n";
+        cout << "1. Tampilkan Jadwal\n";
+        cout << "2. Buat Reservasi\n";
+        cout << "3. Tampilkan Reservasi\n";
+        cout << "4. Keluar\n";
+        cout << "Pilih menu: ";
+        cin >> pilihan;
+
+        switch (pilihan) {
+            case 1:
+                tampilkanJadwal(jadwal);
+                break;
+            case 2:
+                buatReservasi(jadwal, reservasi);
+                break;
+            case 3:
+                tampilkanReservasi(reservasi);
+                break;
+            case 4:
+                cout << "Keluar dari program." << endl;
+                break;
+            default:
+                cout << "Pilihan tidak valid!" << endl;
+        }
+    } while (pilihan != 4);
+
+    return 0;
+}
